@@ -20,8 +20,11 @@ RUN pnpm install --no-frozen-lockfile
 # Copy application source
 COPY packages ./packages
 COPY skills ./skills
-COPY openclaw.json .
 COPY .openclaw ./.openclaw
+
+# Copy OpenClaw config to the expected location (~/.openclaw/)
+RUN mkdir -p /root/.openclaw
+COPY openclaw.json /root/.openclaw/openclaw.json
 
 # Build the project to reduce runtime memory overhead
 RUN pnpm build
