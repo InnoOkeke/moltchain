@@ -1,27 +1,31 @@
 # Moltchain Agent - Docker Image
-FROM node:22-alpine
+FROM node:22-slim
 
+# Prepare workspace
 WORKDIR /app
 
-# Install pnpm
-RUN npm install -g pnpm
+# Install pnpm and essential build tools
+RUN apt-get update && apt-get install -y python3 make g++ && \
+    npm install -g pnpm && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Copy package files
+# Copy workspace configuration
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY packages/scripts/package.json ./packages/scripts/
 COPY skills/moltchain/package.json ./skills/moltchain/
 
-# Install dependencies
+# Install dependencies (recursive)
 RUN pnpm install --no-frozen-lockfile
 
-# Copy source code
+# Copy application source
 COPY packages ./packages
 COPY skills ./skills
 COPY openclaw.json .
 COPY .openclaw ./.openclaw
 
-# Ensure environment is non-interactive for npx/pnpm
-ENV CI=true
+# Debug: verify environment
+RUN node --version && pnpm --version
 
-# Start the agent
-CMD ["pnpm", "exec", "openclaw", "start"]
+# Autonomous agent boot
+ENV CI=true
+CMD ["pnpm", "start"]

@@ -10,7 +10,8 @@
     "detect:signals": "pnpm --filter scripts detect:signals",
     "post:farcaster": "pnpm --filter scripts post:farcaster",
     "engagement:check": "pnpm --filter scripts engagement:check",
-    "openclaw": "openclaw"
+    "openclaw": "openclaw",
+    "start": "openclaw start"
   },
   "keywords": [
     "openclaw",
