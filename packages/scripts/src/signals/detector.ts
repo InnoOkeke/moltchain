@@ -249,7 +249,7 @@ export async function detectSignals(): Promise<DetectedSignal | null> {
 export async function canDeploy(): Promise<{ allowed: boolean; reason: string }> {
     // Check wallet balance
     const wallet = await createWallet('base');
-    const hasFunds = await wallet.hasSufficientBalance('0.005');
+    const hasFunds = await wallet.hasSufficientBalance('0.00001');
 
     if (!hasFunds) {
         return {

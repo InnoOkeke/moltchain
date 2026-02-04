@@ -122,11 +122,11 @@ export async function deployContract(config: DeployConfig): Promise<DeployResult
     const balance = await wallet.getBalance();
     console.log(`   Balance: ${balance} ${wallet.chain.nativeCurrency.symbol}`);
 
-    const hasFunds = await wallet.hasSufficientBalance('0.001');
+    const hasFunds = await wallet.hasSufficientBalance('0.00001');
     if (!hasFunds) {
         throw new Error(
             `Insufficient balance for deployment. ` +
-            `Need at least 0.001 ${wallet.chain.nativeCurrency.symbol}. ` +
+            `Need at least 0.00001 ${wallet.chain.nativeCurrency.symbol}. ` +
             `Current balance: ${balance}`
         );
     }
