@@ -127,7 +127,7 @@ async function main(): Promise<void> {
     }
 
     // Step 5: Deploy the token
-    const result = await deployContract({
+    const result = await (await import('../deployer/deployer.js')).deployContract({
         name: args.name,
         chainId: args.chain,
         bytecode: SIMPLE_ERC20_BYTECODE,

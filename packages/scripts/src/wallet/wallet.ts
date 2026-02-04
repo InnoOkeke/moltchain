@@ -26,6 +26,9 @@ import {
 import { privateKeyToAccount } from 'viem/accounts';
 import { env } from '../config/env.js';
 import { SUPPORTED_CHAINS, type ChainId, getChain } from '../config/chains.js';
+import { getFarcasterUserBySigner } from '../social/farcaster.js';
+
+let cachedFarcasterAddress: Address | null = null;
 
 // ============================================
 // Types
@@ -79,27 +82,29 @@ export interface MoltchainWallet {
  * const balance = await wallet.getBalance();
  * console.log(`Balance: ${balance} ETH`);
  */
-export function createWallet(chainId: ChainId): MoltchainWallet {
+export async function createWallet(chainId: ChainId): Promise<MoltchainWallet> {
     // Get the chain configuration
     const chain = getChain(chainId);
 
-    // Create account from private key (securely loaded from env)
-    // The 0x prefix is added if not present
-    const privateKey = env.privateKey.startsWith('0x')
-        ? env.privateKey as `0x${string}`
-        : `0x${env.privateKey}` as `0x${string}`;
+    // 1. Get the identity address (discovered or derived)
+    const identityAddress = await getWalletAddress();
 
-    const account = privateKeyToAccount(privateKey);
+    // 2. Create account from private key (if available)
+    let account: ReturnType<typeof privateKeyToAccount> | null = null;
+    if (env.privateKey) {
+        const pk = env.privateKey.startsWith('0x') ? env.privateKey : `0x${env.privateKey}`;
+        account = privateKeyToAccount(pk as `0x${string}`);
+    }
 
-    // Create the wallet client (for signing transactions)
-    const walletClient = createWalletClient({
-        account,
+    // Create the public client (for reading state)
+    const publicClient = createPublicClient({
         chain,
         transport: http(),
     });
 
-    // Create the public client (for reading state)
-    const publicClient = createPublicClient({
+    // Create the wallet client (if account available)
+    const walletClient = createWalletClient({
+        account: account || undefined,
         chain,
         transport: http(),
     });
@@ -109,30 +114,30 @@ export function createWallet(chainId: ChainId): MoltchainWallet {
     // ----------------------
 
     /**
-     * Get the wallet's balance in human-readable format
+     * Get the identity wallet's balance in human-readable format
      */
     async function getBalance(): Promise<string> {
         const balance = await publicClient.getBalance({
-            address: account.address,
+            address: identityAddress,
         });
         return formatEther(balance);
     }
 
     /**
-     * Check if wallet has at least the specified balance
+     * Check if identity wallet has at least the specified balance
      * @param minBalance - Minimum balance in ETH (e.g., '0.01')
      */
     async function hasSufficientBalance(minBalance: string): Promise<boolean> {
         const balance = await publicClient.getBalance({
-            address: account.address,
+            address: identityAddress,
         });
         const required = parseEther(minBalance);
         return balance >= required;
     }
 
     return {
-        address: account.address,
-        account,
+        address: identityAddress,
+        account: account as any, // Cast for compatibility, but check for null before signing
         walletClient,
         publicClient,
         chain,
@@ -142,18 +147,39 @@ export function createWallet(chainId: ChainId): MoltchainWallet {
 }
 
 /**
- * Get wallet address without creating a full wallet instance.
- * Useful for display purposes without making RPC calls.
+ * Get wallet address derived from the private key or discovered from Farcaster.
  * 
- * @returns The wallet address derived from the private key
+ * @returns The wallet address
  */
-export function getWalletAddress(): Address {
-    const privateKey = env.privateKey.startsWith('0x')
-        ? env.privateKey as `0x${string}`
-        : `0x${env.privateKey}` as `0x${string}`;
+export async function getWalletAddress(): Promise<Address> {
+    // 1. Try cached Farcaster address first (Primary Identity)
+    if (cachedFarcasterAddress) return cachedFarcasterAddress;
 
-    const account = privateKeyToAccount(privateKey);
-    return account.address;
+    // 2. Try to discover from Farcaster if signer is available
+    if (env.farcasterSignerUuid) {
+        const user = await getFarcasterUserBySigner();
+        if (user?.custody_address) {
+            cachedFarcasterAddress = user.custody_address as Address;
+            return cachedFarcasterAddress;
+        }
+    }
+
+    // 3. Fallback to Private Key derivation
+    if (env.privateKey) {
+        try {
+            const privateKey = env.privateKey.startsWith('0x')
+                ? env.privateKey as `0x${string}`
+                : `0x${env.privateKey}` as `0x${string}`;
+
+            const account = privateKeyToAccount(privateKey);
+            return account.address;
+        } catch (error) {
+            console.warn('⚠️  Failed to derive address from PRIVATE_KEY');
+        }
+    }
+
+    console.warn('⚠️  No identity address found (missing signer and private key)');
+    return '0x0000000000000000000000000000000000000000' as Address;
 }
 
 /**
@@ -161,7 +187,7 @@ export function getWalletAddress(): Address {
  * Useful for debugging and initial setup verification.
  */
 export async function displayWalletInfo(): Promise<void> {
-    const address = getWalletAddress();
+    const address = await getWalletAddress();
 
     console.log('═══════════════════════════════════════');
     console.log('🦞 MOLTCHAIN WALLET');
@@ -172,7 +198,7 @@ export async function displayWalletInfo(): Promise<void> {
 
     for (const [chainId, chain] of Object.entries(SUPPORTED_CHAINS)) {
         try {
-            const wallet = createWallet(chainId as ChainId);
+            const wallet = await createWallet(chainId as ChainId);
             const balance = await wallet.getBalance();
             console.log(`  ${chain.name}: ${balance} ${chain.nativeCurrency.symbol}`);
         } catch (error) {

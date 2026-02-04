@@ -28,7 +28,6 @@ if (fs.existsSync(envPath)) {
     config({ path: envPath });
     console.log('✅ .env loaded');
 } else {
-    console.error('❌ .env not found at root');
     // Fallback to current working directory
     config();
 }
@@ -42,11 +41,18 @@ export const env = {
 } as const;
 
 export function validateEnv(): void {
-    const required = ['GROQ_API_KEY', 'NEYNAR_API_KEY', 'PRIVATE_KEY'];
+    const required = ['GROQ_API_KEY', 'NEYNAR_API_KEY']; // PRIVATE_KEY is now optional if we use Farcaster discovery
     const missing = required.filter(k => !process.env[k]);
+
     if (missing.length > 0) {
-        console.error(`❌ Missing Env: ${missing.join(', ')}`);
+        console.error(`❌ Missing Required Env: ${missing.join(', ')}`);
         process.exit(1);
     }
+
+    if (!process.env.PRIVATE_KEY && !process.env.FARCASTER_SIGNER_UUID) {
+        console.error('❌ Error: Must provide either PRIVATE_KEY or FARCASTER_SIGNER_UUID for agent identity.');
+        process.exit(1);
+    }
+
     console.log('✅ Env Valid');
 }

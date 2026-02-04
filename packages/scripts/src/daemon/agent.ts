@@ -155,7 +155,7 @@ async function runIteration(): Promise<void> {
                     name: contractName,
                     symbol: contractSymbol,
                     description: signal.reason,
-                    ownerAddress: (await import('../wallet/wallet.js')).getWalletAddress(),
+                    ownerAddress: await (await import('../wallet/wallet.js')).getWalletAddress(),
                 });
                 result = {
                     address: clankerResult.tokenAddress as `0x${string}`,
@@ -278,7 +278,7 @@ async function postPeriodicStatus(): Promise<void> {
     try {
         const stats = getDeploymentStats();
         const sunsetStats = getSunsetStats();
-        const wallet = createWallet('base');
+        const wallet = await createWallet('base');
         const balance = await wallet.getBalance();
 
         const message = `Autonomous Agent Status
@@ -326,7 +326,7 @@ export async function startDaemon(): Promise<void> {
     validateEnv();
 
     // Show wallet info
-    const wallet = createWallet('base');
+    const wallet = await createWallet('base');
     const balance = await wallet.getBalance();
     const stats = getDeploymentStats();
 

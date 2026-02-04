@@ -231,3 +231,67 @@ export async function postStatusUpdate(message: string): Promise<CastResult> {
         text: `🦞 ${message}\n\n#Moltchain`,
     });
 }
+
+// ============================================
+// User Discovery Functions
+// ============================================
+
+/**
+ * Fetch Farcaster user details by signer_uuid.
+ * 
+ * @returns The user details including custody address
+ */
+export async function getFarcasterUserBySigner(): Promise<{ fid: number, custody_address: string } | null> {
+    if (!env.farcasterSignerUuid) return null;
+
+    try {
+        console.log('🔍 Discovering Farcaster user via signer...');
+
+        // Step 1: Get Signer info (to get FID)
+        const signerResponse = await neynarRequest(`/farcaster/signer?signer_uuid=${env.farcasterSignerUuid}`, 'GET');
+
+        if (!signerResponse.ok) {
+            console.warn('⚠️  Failed to fetch signer info');
+            return null;
+        }
+
+        const signerData = await signerResponse.json() as { status: string, fid: number };
+
+        if (signerData.status !== 'approved' || !signerData.fid) {
+            console.warn('⚠️  Signer is not approved or FID missing');
+            return null;
+        }
+
+        // Step 2: Get User details by FID
+        const userResponse = await neynarRequest(`/farcaster/user/bulk?fids=${signerData.fid}`, 'GET');
+
+        if (!userResponse.ok) {
+            console.warn('⚠️  Failed to fetch user details');
+            return null;
+        }
+
+        const userData = await userResponse.json() as { users: Array<{ fid: number, custody_address: string, verified_addresses: { eth_addresses: string[] }, verifications: string[] }> };
+        const user = userData.users[0];
+
+        if (!user) {
+            console.warn('⚠️  User details not found');
+            return null;
+        }
+
+        // Prioritize verified addresses (usually what people fund)
+        const verifiedAddress = user.verified_addresses?.eth_addresses?.[0] || user.verifications?.[0];
+        const discoveryAddress = (verifiedAddress || user.custody_address) as string;
+
+        console.log(`✅ Discovered Farcaster Identity: ${discoveryAddress}`);
+        if (verifiedAddress) console.log('   (Using Verified Address)');
+        else console.log('   (Using Custody Address)');
+
+        return {
+            fid: user.fid,
+            custody_address: discoveryAddress
+        };
+    } catch (error) {
+        console.error('❌ Error discovering Farcaster user:', error);
+        return null;
+    }
+}

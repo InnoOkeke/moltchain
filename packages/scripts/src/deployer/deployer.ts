@@ -115,7 +115,7 @@ export async function deployContract(config: DeployConfig): Promise<DeployResult
 
     // Step 1: Create wallet for the target chain
     console.log('📝 Creating wallet connection...');
-    const wallet = createWallet(chainId);
+    const wallet = await createWallet(chainId);
 
     // Step 2: Check balance
     console.log('💰 Checking wallet balance...');
@@ -208,7 +208,7 @@ export async function estimateDeploymentGas(
     abi: Abi,
     args: unknown[] = []
 ): Promise<bigint> {
-    const wallet = createWallet(chainId);
+    const wallet = await createWallet(chainId);
 
     const gas = await wallet.publicClient.estimateGas({
         account: wallet.address,
