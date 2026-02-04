@@ -9,6 +9,7 @@
     "deploy:token": "pnpm --filter scripts deploy:token",
     "detect:signals": "pnpm --filter scripts detect:signals",
     "post:farcaster": "pnpm --filter scripts post:farcaster",
+    "engagement:check": "pnpm --filter scripts engagement:check",
     "openclaw": "openclaw"
   },
   "keywords": [

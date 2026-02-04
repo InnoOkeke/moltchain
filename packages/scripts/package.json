@@ -9,6 +9,9 @@
         "start": "tsx src/daemon/agent.ts",
         "dev": "tsx watch src/daemon/agent.ts",
         "deploy:token": "tsx src/commands/deploy-token.ts",
+        "post:farcaster": "tsx src/commands/post-farcaster.ts",
+        "detect:signals": "tsx src/daemon/agent.ts --task narrative",
+        "engagement:check": "tsx src/daemon/agent.ts --task engagement",
         "test": "vitest run",
         "test:watch": "vitest"
     },

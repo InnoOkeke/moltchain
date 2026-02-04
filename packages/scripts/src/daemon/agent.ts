@@ -373,16 +373,50 @@ function sleep(ms: number): Promise<void> {
 // Entry Point
 // ============================================
 
-// Handle graceful shutdown
-process.on('SIGINT', () => {
-    stopDaemon();
-    process.exit(0);
-});
+import { parseArgs } from 'util';
 
-process.on('SIGTERM', () => {
-    stopDaemon();
-    process.exit(0);
-});
+async function main() {
+    const { values } = parseArgs({
+        options: {
+            task: { type: 'string', short: 't' },
+            once: { type: 'boolean', short: 'o', default: false }
+        }
+    });
 
-// Start the daemon if run directly
-startDaemon().catch(console.error);
+    // Handle graceful shutdown
+    process.on('SIGINT', () => {
+        stopDaemon();
+        process.exit(0);
+    });
+
+    process.on('SIGTERM', () => {
+        stopDaemon();
+        process.exit(0);
+    });
+
+    if (values.task) {
+        console.log(`🚀 Executing one-time task: ${values.task}`);
+        validateEnv();
+
+        switch (values.task) {
+            case 'narrative':
+                await runIteration();
+                break;
+            case 'engagement':
+                await runEngagementCheck();
+                break;
+            case 'status':
+                await postPeriodicStatus();
+                break;
+            default:
+                console.error(`❌ Unknown task: ${values.task}`);
+                process.exit(1);
+        }
+        process.exit(0);
+    } else {
+        // Start the daemon if run directly without task
+        startDaemon().catch(console.error);
+    }
+}
+
+main().catch(console.error);

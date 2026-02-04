@@ -1,136 +1,52 @@
-/**
- * ============================================
- * MOLTCHAIN - Environment Configuration Loader
- * ============================================
- * 
- * Securely loads and validates environment variables.
- * All sensitive data (API keys, private keys) are loaded
- * from .env file and NEVER hardcoded.
- * 
- * SECURITY NOTES:
- * - Never log or expose these values
- * - Never commit .env to version control
- * - Use .env.example as a template
- */
-
 import { config } from 'dotenv';
-import { resolve } from 'path';
-
-// Load environment variables from .env file
-// Looks in project root (two levels up from this file)
-config({ path: resolve(process.cwd(), '.env') });
-
-// ============================================
-// Environment Variable Helpers
-// ============================================
+import { resolve, dirname, join } from 'path';
+import { fileURLToPath } from 'url';
+import fs from 'fs';
 
 /**
- * Get a required environment variable.
- * Throws an error if the variable is missing.
- * 
- * @param key - The environment variable name
- * @returns The environment variable value
- * @throws Error if the variable is not set
+ * Finds the project root by looking for pnpm-workspace.yaml or package.json
  */
-function getRequired(key: string): string {
-    const value = process.env[key];
-
-    if (!value) {
-        throw new Error(
-            `Missing required environment variable: ${key}\n` +
-            `Please add it to your .env file. See .env.example for reference.`
-        );
+function findProjectRoot(startDir: string): string {
+    let current = startDir;
+    while (current !== dirname(current)) {
+        if (fs.existsSync(join(current, 'pnpm-workspace.yaml')) || fs.existsSync(join(current, 'pnpm-lock.yaml'))) {
+            return current;
+        }
+        current = dirname(current);
     }
-
-    return value;
+    return startDir;
 }
 
-/**
- * Get an optional environment variable with a default value.
- * 
- * @param key - The environment variable name
- * @param defaultValue - The default value if not set
- * @returns The environment variable value or default
- */
-function getOptional(key: string, defaultValue: string): string {
-    return process.env[key] || defaultValue;
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const root = findProjectRoot(__dirname);
+const envPath = join(root, '.env');
+
+console.log(`🔍 Project Root: ${root}`);
+console.log(`🔍 Loading .env from: ${envPath}`);
+
+if (fs.existsSync(envPath)) {
+    config({ path: envPath });
+    console.log('✅ .env loaded');
+} else {
+    console.error('❌ .env not found at root');
+    // Fallback to current working directory
+    config();
 }
 
-// ============================================
-// Exported Configuration
-// ============================================
-
-/**
- * All environment configuration in one place.
- * Import this object to access any config value.
- * 
- * @example
- * import { env } from './config/env';
- * 
- * const client = new Groq({ apiKey: env.groqApiKey });
- */
 export const env = {
-    // -----------------------
-    // LLM Configuration
-    // -----------------------
-
-    /** Groq API key for LLM calls (required) */
-    groqApiKey: getRequired('GROQ_API_KEY'),
-
-    // -----------------------
-    // Blockchain Configuration
-    // -----------------------
-
-    /** Base Sepolia RPC URL */
-    baseSepoliaRpcUrl: getOptional('BASE_SEPOLIA_RPC_URL', 'https://sepolia.base.org'),
-
-    /** Wallet private key (required for deployments) */
-    privateKey: getRequired('PRIVATE_KEY'),
-
-    // -----------------------
-    // Social Configuration
-    // -----------------------
-
-    /** Neynar API key for Farcaster (required) */
-    neynarApiKey: getRequired('NEYNAR_API_KEY'),
-
-    /** Farcaster signer UUID from Neynar (required for posting) */
-    farcasterSignerUuid: getOptional('FARCASTER_SIGNER_UUID', ''),
-
-    // -----------------------
-    // Optional APIs
-    // -----------------------
-
-    /** BaseScan API key for contract verification */
-    basescanApiKey: getOptional('BASESCAN_API_KEY', ''),
+    groqApiKey: process.env.GROQ_API_KEY || '',
+    neynarApiKey: process.env.NEYNAR_API_KEY || '',
+    privateKey: process.env.PRIVATE_KEY || '',
+    farcasterSignerUuid: process.env.FARCASTER_SIGNER_UUID || '',
+    basescanApiKey: process.env.BASESCAN_API_KEY || '',
 } as const;
 
-/**
- * Validate that all required environment variables are set.
- * Call this at application startup to fail fast.
- * 
- * @throws Error if any required variable is missing
- */
 export function validateEnv(): void {
-    console.log('🔐 Validating environment configuration...');
-
-    // These will throw if not set (already validated by getRequired)
-    // But we call them here to provide a clear startup check
-    const requiredVars = [
-        'GROQ_API_KEY',
-        'PRIVATE_KEY',
-        'NEYNAR_API_KEY',
-    ];
-
-    const missing = requiredVars.filter(key => !process.env[key]);
-
+    const required = ['GROQ_API_KEY', 'NEYNAR_API_KEY', 'PRIVATE_KEY'];
+    const missing = required.filter(k => !process.env[k]);
     if (missing.length > 0) {
-        throw new Error(
-            `Missing required environment variables:\n` +
-            missing.map(k => `  - ${k}`).join('\n') +
-            `\n\nPlease copy .env.example to .env and fill in your values.`
-        );
+        console.error(`❌ Missing Env: ${missing.join(', ')}`);
+        process.exit(1);
     }
-
-    console.log('✅ Environment configuration valid');
+    console.log('✅ Env Valid');
 }
