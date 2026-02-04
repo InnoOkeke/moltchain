@@ -24,4 +24,4 @@ COPY .openclaw ./.openclaw
 ENV CI=true
 
 # Start the agent
-CMD ["pnpm", "openclaw", "start"]
+CMD ["pnpm", "exec", "openclaw", "start"]

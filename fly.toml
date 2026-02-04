@@ -13,7 +13,7 @@ primary_region = "iad"
 
 # Background worker - no HTTP service
 [processes]
-  agent = "pnpm openclaw start"
+  agent = "pnpm exec openclaw start"
 
 # Machine configuration
 [[vm]]
