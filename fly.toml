@@ -21,7 +21,6 @@ primary_region = "iad"
   memory = "512mb"
   processes = ["agent"]
 
-# Only run 1 machine (important for agents to avoid double-actions)
+# Only run 1 machine
 [deploy]
-  min_machines_running = 1
-  strategy = "recreate"
+  strategy = "rolling"
