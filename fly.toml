@@ -8,15 +8,15 @@ primary_region = "iad"
 [env]
   NODE_ENV = "production"
   BASE_RPC_URL = "https://mainnet.base.org"
-  NODE_OPTIONS = "--max-old-space-size=640"
+  NODE_OPTIONS = "--max-old-space-size=3072"
 
 # No process overrides - use Docker CMD
 [processes]
 
 # Machine configuration
 [[vm]]
-  size = "shared-cpu-1x"
-  memory = "1024mb"
+  size = "shared-cpu-2x"
+  memory = "4096mb"
 
 # Rolling deployment strategy
 [deploy]
