@@ -1,1 +1,1 @@
-web: npx openclaw start
+web: npx openclaw gateway run

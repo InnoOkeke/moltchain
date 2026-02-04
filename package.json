@@ -11,7 +11,7 @@
     "post:farcaster": "pnpm --filter scripts post:farcaster",
     "engagement:check": "pnpm --filter scripts engagement:check",
     "openclaw": "openclaw",
-    "start": "openclaw start"
+    "start": "openclaw gateway run"
   },
   "keywords": [
     "openclaw",
