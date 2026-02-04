@@ -1,7 +1,7 @@
 # Moltchain Agent - Fly.io Configuration
-# Runs the OpenClaw autonomous agent 24/7
+# Runs the OpenClaw autonomous agent 24/7 as a BACKGROUND WORKER
 
-app = "moltchain-agent"
+app = "moltchain"
 primary_region = "iad"
 
 [build]
@@ -11,12 +11,17 @@ primary_region = "iad"
   NODE_ENV = "production"
   BASE_RPC_URL = "https://mainnet.base.org"
 
-# No HTTP service needed - this is a background worker
+# Background worker - no HTTP service
 [processes]
-  agent = "npx openclaw start"
+  agent = "pnpm openclaw start"
 
 # Machine configuration
 [[vm]]
-  cpu_kind = "shared"
-  cpus = 1
-  memory_mb = 512
+  size = "shared-cpu-1x"
+  memory = "512mb"
+  processes = ["agent"]
+
+# Only run 1 machine (important for agents to avoid double-actions)
+[deploy]
+  min_machines_running = 1
+  strategy = "recreate"

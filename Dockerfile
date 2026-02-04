@@ -8,15 +8,20 @@ RUN npm install -g pnpm
 
 # Copy package files
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-COPY packages ./packages
-COPY skills ./skills
+COPY packages/scripts/package.json ./packages/scripts/
+COPY skills/moltchain/package.json ./skills/moltchain/
 
 # Install dependencies
-RUN pnpm install --frozen-lockfile
+RUN pnpm install --no-frozen-lockfile
 
-# Copy remaining files
+# Copy source code
+COPY packages ./packages
+COPY skills ./skills
 COPY openclaw.json .
 COPY .openclaw ./.openclaw
 
+# Ensure environment is non-interactive for npx/pnpm
+ENV CI=true
+
 # Start the agent
-CMD ["npx", "openclaw", "start"]
+CMD ["pnpm", "openclaw", "start"]

@@ -10,9 +10,19 @@
     "detect:signals": "pnpm --filter scripts detect:signals",
     "post:farcaster": "pnpm --filter scripts post:farcaster"
   },
-  "keywords": ["openclaw", "autonomous", "agent", "base", "monad", "blockchain"],
+  "keywords": [
+    "openclaw",
+    "autonomous",
+    "agent",
+    "base",
+    "monad",
+    "blockchain"
+  ],
   "author": "",
   "license": "MIT",
+  "dependencies": {
+    "openclaw": "latest"
+  },
   "engines": {
     "node": ">=20.0.0"
   }
