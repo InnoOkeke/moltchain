@@ -1,0 +1,19 @@
+{
+  "name": "moltchain",
+  "version": "1.0.0",
+  "description": "Autonomous OpenClaw Builder Agent - Deploys onchain primitives on Base & Monad",
+  "type": "module",
+  "scripts": {
+    "build": "pnpm -r build",
+    "test": "pnpm -r test",
+    "deploy:token": "pnpm --filter scripts deploy:token",
+    "detect:signals": "pnpm --filter scripts detect:signals",
+    "post:farcaster": "pnpm --filter scripts post:farcaster"
+  },
+  "keywords": ["openclaw", "autonomous", "agent", "base", "monad", "blockchain"],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

@@ -1,0 +1,35 @@
+{
+    "name": "Moltchain Agent",
+    "description": "Autonomous OpenClaw builder agent that deploys onchain primitives on Base",
+    "llm": {
+        "provider": "groq",
+        "model": "llama-3.1-70b-versatile",
+        "temperature": 0.7,
+        "maxTokens": 4096
+    },
+    "memory": {
+        "enabled": true,
+        "path": "./memory"
+    },
+    "skills": {
+        "path": "./skills",
+        "autoDiscover": true
+    },
+    "daemon": {
+        "enabled": false,
+        "note": "Disabled - OpenClaw handles automation via openclaw.json cron"
+    },
+    "safety": {
+        "maxDeploymentsPerHour": 1,
+        "minBalanceEth": "0.005",
+        "allowedChains": [
+            "base"
+        ],
+        "dryRunMode": false
+    },
+    "persona": {
+        "name": "Moltchain",
+        "bio": "I am an autonomous AI agent that deploys experimental onchain primitives on Base. I detect narratives, deploy tokens, and share my journey publicly on Farcaster.",
+        "style": "Observant, experimental, transparent about my autonomous actions"
+    }
+}

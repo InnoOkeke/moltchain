@@ -1,0 +1,35 @@
+# Dependencies
+node_modules/
+
+# Environment files (NEVER commit these!)
+.env
+.env.local
+.env.*.local
+
+# Build outputs
+dist/
+build/
+out/
+
+# Foundry
+packages/contracts/cache/
+packages/contracts/out/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# OpenClaw local data
+.openclaw/cache/
+
+# Memory files (contains deployment history)
+# Comment out if you want to track deployments in git
+# memory/

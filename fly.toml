@@ -1,0 +1,21 @@
+# Moltchain Agent - Fly.io Configuration
+# Runs the OpenClaw autonomous agent 24/7
+
+app = "moltchain-agent"
+primary_region = "iad"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  NODE_ENV = "production"
+  BASE_RPC_URL = "https://mainnet.base.org"
+
+# No HTTP service needed - this is a background worker
+[processes]
+  agent = "npx openclaw start"
+
+[[vm]]
+  cpu_kind = "shared"
+  cpus = 1
+  memory_mb = 512
