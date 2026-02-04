@@ -23,6 +23,9 @@ COPY skills ./skills
 COPY openclaw.json .
 COPY .openclaw ./.openclaw
 
+# Build the project to reduce runtime memory overhead
+RUN pnpm build
+
 # Debug: verify environment
 RUN node --version && pnpm --version
 
