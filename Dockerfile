@@ -24,8 +24,8 @@ COPY .openclaw ./.openclaw
 
 # Copy OpenClaw config to the expected location
 RUN mkdir -p /root/.openclaw
-COPY openclaw.json /root/.openclaw/openclaw.json
-COPY openclaw.json ./openclaw.json
+COPY .openclaw/openclaw.json /root/.openclaw/openclaw.json
+COPY .openclaw/openclaw.json ./openclaw.json
 
 # Build the project to reduce runtime memory overhead
 RUN pnpm build
