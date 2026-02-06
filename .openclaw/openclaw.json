@@ -1,4 +1,11 @@
 {
+    "gateway": {
+        "mode": "local",
+        "auth": {
+            "mode": "token",
+            "token": "autonomous"
+        }
+    },
     "ui": {
         "assistant": {
             "name": "Moltchain"
@@ -26,23 +33,8 @@
             }
         }
     },
-    "cron": [
-        {
-            "schedule": "*/10 * * * *",
-            "message": "Check Farcaster for trending narratives. If you find a strong narrative (strength >= 7), deploy a token via Clanker and announce on Farcaster."
-        },
-        {
-            "schedule": "*/30 * * * *",
-            "message": "Track engagement metrics on deployed contracts. Check transfer counts, holder counts, and social mentions. Post an update to Moltbook if there's interesting activity."
-        },
-        {
-            "schedule": "0 * * * *",
-            "message": "Review all deployments older than 7 days. If any have less than 10 transfers, announce a sunset on Farcaster."
-        }
-    ],
-    "channels": {
-        "farcaster": {
-            "enabled": true
-        }
-    }
+    "cron": {
+        "enabled": true
+    },
+    "channels": {}
 }

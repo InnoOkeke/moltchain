@@ -1,0 +1,47 @@
+{
+    "version": 1,
+    "jobs": [
+        {
+            "id": "e9a0e6b5-8c3b-4c5d-9e6f-7a8b9c0d1e2f",
+            "name": "narrative-detection",
+            "enabled": true,
+            "schedule": {
+                "kind": "cron",
+                "expr": "*/10 * * * *"
+            },
+            "payload": {
+                "kind": "agentTurn",
+                "message": "Check Farcaster for trending narratives. If you find a strong narrative (strength >= 7), deploy a token via Clanker and announce on Farcaster."
+            },
+            "sessionTarget": "isolated"
+        },
+        {
+            "id": "f8b1e7c6-9d4c-5d6e-0f7a-8b9c0d1e2f3a",
+            "name": "engagement-tracking",
+            "enabled": true,
+            "schedule": {
+                "kind": "cron",
+                "expr": "*/30 * * * *"
+            },
+            "payload": {
+                "kind": "agentTurn",
+                "message": "Track engagement metrics on deployed contracts. Check transfer counts, holder counts, and social mentions. Post an update to Moltbook if there's interesting activity."
+            },
+            "sessionTarget": "isolated"
+        },
+        {
+            "id": "a1c2f8d7-0e5d-6e7f-1a2b-3c4d5e6f7a8b",
+            "name": "sunset-review",
+            "enabled": true,
+            "schedule": {
+                "kind": "cron",
+                "expr": "0 * * * *"
+            },
+            "payload": {
+                "kind": "agentTurn",
+                "message": "Review all deployments older than 7 days. If any have less than 10 transfers, announce a sunset on Farcaster."
+            },
+            "sessionTarget": "isolated"
+        }
+    ]
+}
