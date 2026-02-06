@@ -41,18 +41,28 @@ export const env = {
 } as const;
 
 export function validateEnv(): void {
-    const required = ['GROQ_API_KEY', 'NEYNAR_API_KEY']; // PRIVATE_KEY is now optional if we use Farcaster discovery
+    const required = ['GROQ_API_KEY', 'NEYNAR_API_KEY'];
     const missing = required.filter(k => !process.env[k]);
 
     if (missing.length > 0) {
-        console.error(`❌ Missing Required Env: ${missing.join(', ')}`);
+        console.error(`❌ Missing Required Env Variables: ${missing.join(', ')}`);
+        console.error('💡 Ensure these are set in your .env file or as Fly.io secrets.');
         process.exit(1);
+    }
+
+    // Check for common interpolation errors (literal "${VAR}")
+    const suspicious = Object.entries(process.env).filter(([k, v]) => v?.startsWith('${') && v?.endsWith('}'));
+    if (suspicious.length > 0) {
+        console.warn('⚠️  Suspicious environment variables detected (looks like literal interpolation):');
+        suspicious.forEach(([k, v]) => console.warn(`   - ${k}=${v}`));
+        console.warn('💡 This usually means your config file is trying to interpolate variables that aren\'t set.');
     }
 
     if (!process.env.PRIVATE_KEY && !process.env.FARCASTER_SIGNER_UUID) {
-        console.error('❌ Error: Must provide either PRIVATE_KEY or FARCASTER_SIGNER_UUID for agent identity.');
+        console.error('❌ Identity Error: Must provide either PRIVATE_KEY or FARCASTER_SIGNER_UUID.');
+        console.error('💡 For Farcaster identity, ensure FARCASTER_SIGNER_UUID is set correctly.');
         process.exit(1);
     }
 
-    console.log('✅ Env Valid');
+    console.log('✅ Environment Validation Complete');
 }

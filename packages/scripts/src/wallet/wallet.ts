@@ -178,8 +178,9 @@ export async function getWalletAddress(): Promise<Address> {
         }
     }
 
-    console.warn('⚠️  No identity address found (missing signer and private key)');
-    return '0x0000000000000000000000000000000000000000' as Address;
+    console.error('❌ Identity Critical Error: No identity found (missing signer AND private key)');
+    console.error('💡 The agent cannot function without a wallet address.');
+    process.exit(1);
 }
 
 /**

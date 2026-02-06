@@ -22,9 +22,10 @@ COPY packages ./packages
 COPY skills ./skills
 COPY .openclaw ./.openclaw
 
-# Copy OpenClaw config to the expected location (~/.openclaw/)
+# Copy OpenClaw config to the expected location
 RUN mkdir -p /root/.openclaw
 COPY openclaw.json /root/.openclaw/openclaw.json
+COPY openclaw.json ./openclaw.json
 
 # Build the project to reduce runtime memory overhead
 RUN pnpm build
